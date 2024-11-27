@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <!-- Image for Take Attendance -->
+    <ImageView
+        android:id="@+id/imageViewTakeAttendance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_take_attendance"
+        android:contentDescription="Take Attendance"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Button for Take Attendance -->
+    <Button
+        android:id="@+id/buttonTakeAttendance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Take Attendance"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Image for Upload Attendance -->
+    <ImageView
+        android:id="@+id/imageViewUploadAttendance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_upload_attendance"
+        android:contentDescription="Upload Attendance"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Button for Upload Attendance -->
+    <Button
+        android:id="@+id/buttonUploadAttendance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Attendance" />
+</LinearLayout>

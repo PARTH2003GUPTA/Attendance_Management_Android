@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Define the paths for FileProvider to access files -->
+
+    <!-- External storage path (e.g., Downloads folder) -->
+    <external-path name="downloads" path="Download/" />
+
+    <!-- Internal app storage (e.g., internal files) -->
+    <files-path name="internal_files" path="." />
+
+    <!-- Cache path (optional, if needed) -->
+    <cache-path name="cache" path="." />
+
+    <!-- External files path (optional, if needed) -->
+    <external-files-path name="external_files" path="." />
+</paths>

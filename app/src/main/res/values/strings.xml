@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">attendance</string>
+    <string-array name="courses">
+        <item>B.Tech</item>
+        <item>M.Tech</item>
+    </string-array>
+    <string-array name="semesters">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="sections">
+        <item>A</item>
+        <item>B</item>
+    </string-array>
+</resources>

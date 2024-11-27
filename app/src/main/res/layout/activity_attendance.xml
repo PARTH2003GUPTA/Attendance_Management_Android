@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".AttendanceActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Spinner for Course Selection -->
+        <Spinner
+            android:id="@+id/spinnerCourse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:spinnerMode="dropdown" />
+
+        <!-- Spinner for Semester Selection -->
+        <Spinner
+            android:id="@+id/spinnerSemester"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:spinnerMode="dropdown" />
+
+        <!-- Spinner for Section Selection -->
+        <Spinner
+            android:id="@+id/spinnerSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:spinnerMode="dropdown" />
+
+        <!-- Spinner for Lecture Type Selection -->
+        <Spinner
+            android:id="@+id/spinnerLectureType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:spinnerMode="dropdown" />
+
+        <!-- Spinner for Day Selection -->
+        <Spinner
+            android:id="@+id/spinnerDay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:spinnerMode="dropdown" />
+
+        <!-- EditText for Start Time -->
+        <EditText
+            android:id="@+id/editTextStartTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Start Time(Double tap)"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:padding="12dp"
+            android:inputType="time" />
+
+        <!-- EditText for End Time -->
+        <EditText
+            android:id="@+id/editTextEndTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select End Time(Double tap)"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:padding="12dp"
+            android:inputType="time" />
+
+        <!-- EditText for Date -->
+        <EditText
+            android:id="@+id/editTextDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Date(Double tap)"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:padding="12dp"
+            android:inputType="date" />
+
+        <!-- EditText for Course ID -->
+        <EditText
+            android:id="@+id/editTextCourseID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Course ID"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:padding="12dp"
+            android:inputType="text" />
+
+        <!-- EditText for Faculty id same as in database -->
+        <EditText
+            android:id="@+id/editTextFacultyID"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Faculty ID"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:padding="12dp"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/buttonGenerateSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Generate Attendance Sheet"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/primaryColor"
+            android:textColor="@android:color/white"
+            android:padding="12dp"/>
+
+        <!-- TableLayout to display students for attendance -->
+        <TableLayout
+            android:id="@+id/tableLayoutAttendance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:stretchColumns="1"
+            android:divider="@android:color/darker_gray"
+            android:showDividers="middle"
+            android:padding="8dp"/>
+
+        <!-- Button to Save Attendance -->
+        <Button
+            android:id="@+id/buttonSaveAttendance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Attendance"
+            android:backgroundTint="@color/primaryColor"
+            android:textColor="@android:color/white"
+            android:padding="12dp" />
+
+    </LinearLayout>
+</ScrollView>
