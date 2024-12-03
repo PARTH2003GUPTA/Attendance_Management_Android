@@ -22,13 +22,13 @@ class AttendanceActivity : AppCompatActivity() {
     private lateinit var spinnerCourse: Spinner
     private lateinit var spinnerSemester: Spinner
     private lateinit var spinnerSection: Spinner
-    private lateinit var spinnerDay: Spinner
     private lateinit var spinnerLectureType: Spinner
     private lateinit var editTextStartTime: EditText
     private lateinit var editTextEndTime: EditText
     private lateinit var editTextDate: EditText
     private lateinit var editTextCourseID: EditText
     private lateinit var editTextFacultyID:EditText
+    private lateinit var editTextLectureCount:EditText
     private lateinit var buttonGenerateSheet: Button
     private lateinit var buttonSaveAttendance: Button
     private lateinit var tableLayoutAttendance: TableLayout
@@ -47,8 +47,10 @@ class AttendanceActivity : AppCompatActivity() {
                 enrollment_no VARCHAR,
                 name VARCHAR,
                 course_id VARCHAR,
-                semester INTEGER,
-                section VARCHAR
+                semester VARCHAR,
+                section VARCHAR,
+                course VARCHAR
+                
             );
         """
         )
@@ -64,8 +66,8 @@ class AttendanceActivity : AppCompatActivity() {
                 course_id VARCHAR,
                 start_time VARCHAR,
                 end_time VARCHAR,
-                day VARCHAR,
                 lecture_type VARCHAR,
+                lecture_count INTEGER,
                 faculty_id VARCHAR
             );
         """
@@ -76,13 +78,13 @@ class AttendanceActivity : AppCompatActivity() {
         spinnerCourse = findViewById(R.id.spinnerCourse)
         spinnerSemester = findViewById(R.id.spinnerSemester)
         spinnerSection = findViewById(R.id.spinnerSection)
-        spinnerDay = findViewById(R.id.spinnerDay)
         spinnerLectureType = findViewById(R.id.spinnerLectureType)
         editTextStartTime = findViewById(R.id.editTextStartTime)
         editTextEndTime = findViewById(R.id.editTextEndTime)
         editTextDate = findViewById(R.id.editTextDate)
         editTextCourseID = findViewById(R.id.editTextCourseID)
         editTextFacultyID=findViewById(R.id.editTextFacultyID)
+        editTextLectureCount=findViewById(R.id.editTextLectureCount)
         buttonGenerateSheet = findViewById(R.id.buttonGenerateSheet)
         buttonSaveAttendance = findViewById(R.id.buttonSaveAttendance)
         tableLayoutAttendance = findViewById(R.id.tableLayoutAttendance)
@@ -131,13 +133,8 @@ class AttendanceActivity : AppCompatActivity() {
             spinnerSection.adapter = adapter
         }
 
-        val days = listOf("Select Day", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-        ArrayAdapter(this, android.R.layout.simple_spinner_item, days).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerDay.adapter = adapter
-        }
 
-        val lectureTypes = listOf("Select Lecture Type", "Theory", "Lab")
+        val lectureTypes = listOf("Select Lecture Type", "T", "L","P")
         ArrayAdapter(this, android.R.layout.simple_spinner_item, lectureTypes).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerLectureType.adapter = adapter
@@ -161,8 +158,9 @@ class AttendanceActivity : AppCompatActivity() {
                 put("enrollment_no", enrollmentNo)
                 put("name", name)
                 put("course_id", "CO2589")
-                put("semester", 1)
+                put("semester", "I")
                 put("section", "A")
+                put("course","BTech")
             }
             db.insertWithOnConflict("Students", null, student, SQLiteDatabase.CONFLICT_IGNORE)
         }
@@ -172,13 +170,13 @@ class AttendanceActivity : AppCompatActivity() {
         if (spinnerCourse.selectedItem.toString() == "Select Course" ||
             spinnerSemester.selectedItem.toString() == "Select Semester" ||
             spinnerSection.selectedItem.toString() == "Select Section" ||
-            spinnerDay.selectedItem.toString() == "Select Day" ||
             spinnerLectureType.selectedItem.toString() == "Select Lecture Type" ||
             editTextStartTime.text.isEmpty() ||
             editTextEndTime.text.isEmpty() ||
             editTextDate.text.isEmpty() ||
             editTextCourseID.text.isEmpty() ||
-            editTextFacultyID.text.isEmpty()
+            editTextFacultyID.text.isEmpty() ||
+            editTextLectureCount.text.isEmpty()
         ) {
             Toast.makeText(this, "Please fill all fields correctly.", Toast.LENGTH_SHORT).show()
             return false
@@ -190,10 +188,11 @@ class AttendanceActivity : AppCompatActivity() {
         val courseID = editTextCourseID.text.toString()
         val semester = spinnerSemester.selectedItem.toString()
         val section = spinnerSection.selectedItem.toString()
+        val course=spinnerCourse.selectedItem.toString()
 
         val cursor: Cursor = db.rawQuery(
-            "SELECT enrollment_no, name FROM Students WHERE course_id=? AND semester=? AND section=?",
-            arrayOf(courseID, semester, section)
+            "SELECT DISTINCT enrollment_no, name FROM Students WHERE course_id=? AND semester=? AND section=? AND course=?",
+            arrayOf(courseID, semester, section,course)
         )
 
         tableLayoutAttendance.removeAllViews()
@@ -228,8 +227,9 @@ class AttendanceActivity : AppCompatActivity() {
         val courseID = editTextCourseID.text.toString()
         val startTime = editTextStartTime.text.toString()
         val endTime = editTextEndTime.text.toString()
-        val day = spinnerDay.selectedItem.toString()
         val lectureType = spinnerLectureType.selectedItem.toString()
+        val lectureCountInput = editTextLectureCount.text.toString().trim()
+        val lectureCount = lectureCountInput.toIntOrNull() ?: 1
 
         for (i in 1 until tableLayoutAttendance.childCount) {
             val row = tableLayoutAttendance.getChildAt(i) as TableRow
@@ -244,9 +244,10 @@ class AttendanceActivity : AppCompatActivity() {
                 put("status", if (isPresent) 1 else 0)
                 put("start_time", startTime)
                 put("end_time", endTime)
-                put("day", day)
                 put("lecture_type", lectureType)
+                put("lecture_count",lectureCount)
                 put("faculty_id", facultyID)
+
             }
             db.insert("Attendance", null, values)
         }

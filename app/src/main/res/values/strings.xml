@@ -5,14 +5,14 @@
         <item>M.Tech</item>
     </string-array>
     <string-array name="semesters">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
+        <item>I</item>
+        <item>II</item>
+        <item>III</item>
+        <item>IV</item>
+        <item>V</item>
+        <item>VI</item>
+        <item>VII</item>
+        <item>VIII</item>
     </string-array>
     <string-array name="sections">
         <item>A</item>

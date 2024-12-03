@@ -6,6 +6,20 @@
     android:padding="16dp"
     android:gravity="center">
 
+    <ImageView
+        android:id="@+id/imageViewFetchStudentRecords"
+        android:layout_width="wrap_content"
+        android:layout_height="130dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Fetch Student Records"
+        android:src="@drawable/ic_fetch_students" />
+
+    <!-- Button for Fetch Student Records -->
+    <Button
+        android:id="@+id/buttonFetchStudentRecords"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Fetch Student Records" />
     <!-- Image for Take Attendance -->
     <ImageView
         android:id="@+id/imageViewTakeAttendance"

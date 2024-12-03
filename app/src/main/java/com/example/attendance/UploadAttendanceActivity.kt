@@ -2,6 +2,9 @@ package com.example.attendance
 
 import android.Manifest
 import android.content.ContentValues
+import java.text.SimpleDateFormat
+import java.util.*
+import android.util.Log
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
@@ -74,7 +77,7 @@ class UploadAttendanceActivity : AppCompatActivity() {
     }
 
     private fun showAttendanceOptions(dateTime: String, courseId: String, lectureType: String) {
-        val options = arrayOf("View Attendance", "Edit Attendance", "Download Excel", "Upload Excel")
+        val options = arrayOf("View Attendance", "Edit Attendance", "Download Excel", "Upload Attendance","Delete Attendance")
         AlertDialog.Builder(this)
             .setTitle("Options for $courseId on $dateTime")
             .setItems(options) { _, which ->
@@ -82,12 +85,29 @@ class UploadAttendanceActivity : AppCompatActivity() {
                     0 -> viewAttendance(dateTime, courseId)
                     1 -> editAttendance(dateTime, courseId)
                     2 -> downloadAttendanceAsExcel(dateTime, courseId, lectureType)
-                    3 -> uploadExcel(dateTime, courseId)
+                    3 -> uploadAttendance(dateTime, courseId)
+                    4 -> deleteAttendance(dateTime, courseId)
                 }
             }
             .create()
             .show()
     }
+    private fun deleteAttendance(dateTime: String, courseId: String) {
+        // Confirm deletion
+        AlertDialog.Builder(this)
+            .setTitle("Delete Attendance")
+            .setMessage("Are you sure you want to delete the attendance for $courseId on $dateTime?")
+            .setPositiveButton("Yes") { _, _ ->
+                val deleteQuery = "DELETE FROM Attendance WHERE date_time = ? AND course_id = ?"
+                db.execSQL(deleteQuery, arrayOf(dateTime, courseId))
+                Toast.makeText(this, "Attendance deleted successfully!", Toast.LENGTH_SHORT).show()
+                loadAttendanceData() // Refresh the attendance list
+            }
+            .setNegativeButton("No", null)
+            .create()
+            .show()
+    }
+
 
     private fun viewAttendance(dateTime: String, courseId: String) {
         val cursor = db.rawQuery(
@@ -118,7 +138,8 @@ class UploadAttendanceActivity : AppCompatActivity() {
             arrayOf(dateTime, courseId)
         )
 
-        val attendanceList = mutableListOf<Pair<Int, String>>()
+        val attendanceMap = mutableListOf<Pair<Int, CheckBox>>()
+        val scrollView = ScrollView(this)
         val linearLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(16, 16, 16, 16)
@@ -128,43 +149,53 @@ class UploadAttendanceActivity : AppCompatActivity() {
             val recordId = cursor.getInt(0)
             val enrollmentNo = cursor.getString(1)
             val name = cursor.getString(2)
-            val status = if (cursor.getInt(3) == 1) "Present" else "Absent"
-            val record = "$enrollmentNo - $name: $status"
-            attendanceList.add(recordId to record)
+            val status = cursor.getInt(3)
 
-            val editText = EditText(this).apply {
-                setText(record)
+            // Create a TextView for displaying the student's details
+            val textView = TextView(this).apply {
+                text = "$enrollmentNo - $name"
                 setPadding(0, 8, 0, 8)
             }
-            linearLayout.addView(editText)
+            linearLayout.addView(textView)
 
-            val saveButton = Button(this).apply {
-                text = "Save"
-                setOnClickListener {
-                    val newStatus = if (editText.text.toString().contains("Present")) 1 else 0
-                    updateAttendanceStatus(recordId, newStatus)
-                }
+            // Create a CheckBox for marking attendance
+            val checkBox = CheckBox(this).apply {
+                text = "Absent"
+                isChecked = status == 0 // Checked if Absent
             }
-            linearLayout.addView(saveButton)
+            attendanceMap.add(recordId to checkBox)
+            linearLayout.addView(checkBox)
         }
         cursor.close()
 
-        ScrollView(this).apply {
-            addView(linearLayout)
-            AlertDialog.Builder(this@UploadAttendanceActivity)
-                .setTitle("Edit Attendance")
-                .setView(this)
-                .setPositiveButton("OK", null)
-                .create()
-                .show()
+        // Add a single Save Attendance button at the bottom
+        val saveButton = Button(this).apply {
+            text = "Save Attendance"
+            setOnClickListener {
+                // Loop through the attendanceMap and update the database for each record
+                for ((recordId, checkBox) in attendanceMap) {
+                    val newStatus = if (checkBox.isChecked) 0 else 1
+                    updateAttendanceStatus(recordId, newStatus)
+                }
+                Toast.makeText(this@UploadAttendanceActivity, "Attendance updated!", Toast.LENGTH_SHORT).show()
+            }
         }
+        linearLayout.addView(saveButton)
+
+        scrollView.addView(linearLayout)
+
+        // Display everything in an AlertDialog
+        AlertDialog.Builder(this)
+            .setTitle("Edit Attendance for $courseId on $dateTime")
+            .setView(scrollView)
+            .setPositiveButton("OK") { _, _ ->
+                // Optionally refresh the attendance list after closing
+                loadAttendanceData()
+            }
+            .create()
+            .show()
     }
 
-    private fun updateAttendanceStatus(recordId: Int, status: Int) {
-        val contentValues = ContentValues().apply { put("status", status) }
-        db.update("Attendance", contentValues, "record_id = ?", arrayOf(recordId.toString()))
-        Toast.makeText(this, "Attendance updated!", Toast.LENGTH_SHORT).show()
-    }
 
     private fun downloadAttendanceAsExcel(dateTime: String, courseId: String, lectureID: String) {
         val cursor = db.rawQuery(
@@ -179,7 +210,7 @@ class UploadAttendanceActivity : AppCompatActivity() {
             // Create header
             val headerRow = sheet.createRow(0)
             val headers = arrayOf(
-                "Record ID", "Enrollment Number", "Name", "Date Time", "Status", "Course ID", "Start Time" , "End Time","Day","Lecture Type","Faculty ID"
+                "Record ID", "Enrollment Number", "Name", "Date Time", "Status", "Course ID", "Start Time" , "End Time","Lecture Type","Lecture Count","Faculty ID"
             )
             headers.forEachIndexed { index, header -> headerRow.createCell(index).setCellValue(header) }
 
@@ -216,33 +247,97 @@ class UploadAttendanceActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun uploadExcel(dateTime: String, courseId: String) {
-        val path = "${getExternalFilesDir(null)}/${courseId}_$dateTime.xlsx"
-        val file = File(path)
 
-        if (file.exists()) {
-            val requestBody = RequestBody.create(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".toMediaTypeOrNull(),
-                file
-            )
-            val request = Request.Builder()
-                .url("YOUR_UPLOAD_URL")
-                .post(requestBody)
-                .build()
 
-            Thread {
-                val response = client.newCall(request).execute()
-                runOnUiThread {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this, "File uploaded successfully!", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "File upload failed.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }.start()
-        } else {
-            Toast.makeText(this, "Excel file not found to upload", Toast.LENGTH_SHORT).show()
+    private fun uploadAttendance(dateTime: String, courseId: String) {
+        val cursor = db.rawQuery(
+            """
+        SELECT enrollment_no, name, status, date_time, course_id, start_time, end_time, lecture_type, faculty_id, lecture_count 
+        FROM Attendance WHERE date_time = ? AND course_id = ?
+        """, arrayOf(dateTime, courseId)
+        )
+
+        val attendanceList = ArrayList<Map<String, Any>>()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()) // Current format
+        val isoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()) // ISO format
+
+        // Dynamically fetch column indices
+        val enrollmentNoIndex = cursor.getColumnIndex("enrollment_no")
+        val statusIndex = cursor.getColumnIndex("status")
+        val dateTimeIndex = cursor.getColumnIndex("date_time")
+        val lectureTypeIndex = cursor.getColumnIndex("lecture_type")
+        val facultyIdIndex = cursor.getColumnIndex("faculty_id")
+        val startTimeIndex = cursor.getColumnIndex("start_time")
+        val endTimeIndex = cursor.getColumnIndex("end_time")
+        val lectureCountIndex = cursor.getColumnIndex("lecture_count")
+        val courseIdIndex = cursor.getColumnIndex("course_id")
+
+        // Read data from the cursor
+        while (cursor.moveToNext()) {
+            try {
+                val record = mapOf(
+                    "attendance" to (cursor.getInt(statusIndex) == 1), // Convert 1 or 0 to true/false
+                    "classDate" to isoDateFormat.format(dateFormat.parse(cursor.getString(dateTimeIndex)!!)),
+                    "classType" to cursor.getString(lectureTypeIndex),
+                    "createdBy" to cursor.getString(facultyIdIndex),
+                    "enrollmentId" to cursor.getString(enrollmentNoIndex),
+                    "fromTime" to cursor.getString(startTimeIndex),
+                    "lectureCount" to cursor.getInt(lectureCountIndex),
+                    "subjectCode" to cursor.getString(courseIdIndex),
+                    "toTime" to cursor.getString(endTimeIndex)
+                )
+                attendanceList.add(record)
+            } catch (e: Exception) {
+                Log.e("UploadAttendance", "Error processing record: ${e.message}")
+            }
         }
+        cursor.close()
+
+        // Convert the attendance list directly to JSON
+        val jsonBody = attendanceList.toJson()  // We need to ensure the JSON is correctly formatted
+        Log.d("AttendanceUpload", "Sending attendance data: $jsonBody")
+
+        val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), jsonBody)
+        val request = Request.Builder()
+            .url("http://10.0.2.2:8081/api/student/attendance")  // Adjust the URL accordingly
+            .post(requestBody)
+            .build()
+
+        Thread {
+            val response = client.newCall(request).execute()
+            runOnUiThread {
+                if (response.isSuccessful) {
+                    deleteAttendanceFromDatabase(dateTime, courseId)
+                    Toast.makeText(this, "Attendance uploaded successfully!", Toast.LENGTH_SHORT).show()
+                    loadAttendanceData()
+                } else {
+                    Toast.makeText(this, "Failed to upload attendance: ${response.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+    private fun deleteAttendanceFromDatabase(dateTime: String, courseId: String) {
+        val deleteQuery = "DELETE FROM Attendance WHERE date_time = ? AND course_id = ?"
+        db.execSQL(deleteQuery, arrayOf(dateTime, courseId))
+    }
+
+    // Helper function to convert list to JSON format
+    private fun List<Map<String, Any>>.toJson(): String {
+        val sb = StringBuilder("[")
+        forEachIndexed { index, map ->
+            sb.append("{")
+            map.entries.joinToString(", ") { "\"${it.key}\":\"${it.value}\"" }.let {
+                sb.append(it)
+            }
+            sb.append("}")
+            if (index < size - 1) sb.append(",")  // Only add commas between objects
+        }
+        sb.append("]")
+        return sb.toString()
+    }
+    private fun updateAttendanceStatus(recordId: Int, status: Int) {
+        val contentValues = ContentValues().apply { put("status", status) }
+        db.update("Attendance", contentValues, "record_id = ?", arrayOf(recordId.toString()))
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

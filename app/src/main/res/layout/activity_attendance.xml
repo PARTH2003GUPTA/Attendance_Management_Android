@@ -49,14 +49,6 @@
             android:backgroundTint="?android:attr/colorControlNormal"
             android:spinnerMode="dropdown" />
 
-        <!-- Spinner for Day Selection -->
-        <Spinner
-            android:id="@+id/spinnerDay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="?android:attr/colorControlNormal"
-            android:spinnerMode="dropdown" />
 
         <!-- EditText for Start Time -->
         <EditText
@@ -112,6 +104,15 @@
             android:backgroundTint="?android:attr/colorControlNormal"
             android:padding="12dp"
             android:inputType="text" />
+        <EditText
+            android:id="@+id/editTextLectureCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Lecture Count"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="?android:attr/colorControlNormal"
+            android:padding="12dp"
+            android:inputType="number" />
 
         <Button
             android:id="@+id/buttonGenerateSheet"

@@ -8,7 +8,7 @@ data class AttendanceRecord(
     val courseId: String,
     val startTime: String,
     val endTime: String,
-    val day: String,
     val lectureType: String,
-    val facultyID: String
+    val facultyID: String,
+    val lectureCount :Int
 )
